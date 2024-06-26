@@ -14,23 +14,26 @@
 #ifndef CONSOLEAPPENDER_H
 #define CONSOLEAPPENDER_H
 
-#include "CuteLogger_global.h"
-#include <AbstractStringAppender.h>
+#include "dlog_global.h"
+#include "AbstractStringAppender.h"
 
+DLOG_CORE_BEGIN_NAMESPACE
 
-class CUTELOGGERSHARED_EXPORT ConsoleAppender : public AbstractStringAppender
+class LIBDLOG_SHARED_EXPORT ConsoleAppender : public AbstractStringAppender
 {
-  public:
+public:
     ConsoleAppender();
     virtual QString format() const;
     void ignoreEnvironmentPattern(bool ignore);
 
-  protected:
-    virtual void append(const QDateTime& timeStamp, Logger::LogLevel logLevel, const char* file, int line,
-                        const char* function, const QString& category, const QString& message);
+protected:
+    virtual void append(const QDateTime &time, Logger::LogLevel level, const char *file, int line,
+                        const char *func, const QString &category, const QString &msg);
 
-  private:
+private:
     bool m_ignoreEnvPattern;
 };
+
+DLOG_CORE_END_NAMESPACE
 
 #endif // CONSOLEAPPENDER_H

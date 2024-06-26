@@ -14,36 +14,36 @@
 #ifndef ABSTRACTAPPENDER_H
 #define ABSTRACTAPPENDER_H
 
-// Local
-#include "CuteLogger_global.h"
-#include <Logger.h>
+#include "dlog_global.h"
+#include "Logger.h"
 
-// Qt
 #include <QMutex>
 
+DLOG_CORE_BEGIN_NAMESPACE
 
-class CUTELOGGERSHARED_EXPORT AbstractAppender
+class LIBDLOG_SHARED_EXPORT AbstractAppender
 {
-  public:
-    AbstractAppender();
-    virtual ~AbstractAppender();
+public:
+  AbstractAppender();
+  virtual ~AbstractAppender();
 
-    Logger::LogLevel detailsLevel() const;
-    void setDetailsLevel(Logger::LogLevel level);
-    void setDetailsLevel(const QString& level);
+  Logger::LogLevel detailsLevel() const;
+  void setDetailsLevel(Logger::LogLevel level);
+  void setDetailsLevel(const QString &level);
 
-    void write(const QDateTime& timeStamp, Logger::LogLevel logLevel, const char* file, int line, const char* function,
-               const QString& category, const QString& message);
+  void write(const QDateTime &time, Logger::LogLevel level, const char *file, int line,
+             const char *func, const QString &category, const QString &msg);
 
-  protected:
-    virtual void append(const QDateTime& timeStamp, Logger::LogLevel logLevel, const char* file, int line,
-                        const char* function, const QString& category, const QString& message) = 0;
+protected:
+  virtual void append(const QDateTime &time, Logger::LogLevel level, const char *file, int line,
+                      const char *func, const QString &category, const QString &msg) = 0;
 
-  private:
-    QMutex m_writeMutex;
+private:
+  QMutex m_writeMutex;
 
-    Logger::LogLevel m_detailsLevel;
-    mutable QMutex m_detailsLevelMutex;
+  Logger::LogLevel m_detailsLevel;
+  mutable QMutex m_detailsLevelMutex;
 };
 
+DLOG_CORE_END_NAMESPACE
 #endif // ABSTRACTAPPENDER_H

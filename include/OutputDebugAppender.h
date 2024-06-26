@@ -15,15 +15,18 @@
 #ifndef OUTPUTDEBUGAPPENDER_H
 #define OUTPUTDEBUGAPPENDER_H
 
-#include "CuteLogger_global.h"
-#include <AbstractStringAppender.h>
+#include "dlog_global.h"
+#include "AbstractStringAppender.h"
 
+DLOG_CORE_BEGIN_NAMESPACE
 
-class CUTELOGGERSHARED_EXPORT OutputDebugAppender : public AbstractStringAppender
+class LIBDLOG_SHARED_EXPORT OutputDebugAppender : public AbstractStringAppender
 {
-  protected:
-    virtual void append(const QDateTime& timeStamp, Logger::LogLevel logLevel, const char* file, int line,
-                        const char* function, const QString& category, const QString& message);
+protected:
+  virtual void append(const QDateTime &time, Logger::LogLevel level, const char *file, int line,
+                      const char *func, const QString &category, const QString &msg);
 };
+
+DLOG_CORE_END_NAMESPACE
 
 #endif // OUTPUTDEBUGAPPENDER_H

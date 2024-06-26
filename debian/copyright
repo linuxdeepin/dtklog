@@ -1,9 +1,9 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Upstream-Name: cutelogger
-Source: https://github.com/deepin-community/cutelogger
+Upstream-Name: dtklog
+Source: https://github.com/linuxdeepin/dtklog
 
 Files: *
-Copyright: 2017 Deepin Technology Co., Ltd.
+Copyright: 2024 Deepin Technology Co., Ltd.
 License: LGPL-2.1
  This package is free software; you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as published by

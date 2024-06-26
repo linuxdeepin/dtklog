@@ -15,41 +15,38 @@
 #define FILEAPPENDER_H
 
 // Logger
-#include "CuteLogger_global.h"
-#include <AbstractStringAppender.h>
+#include "dlog_global.h"
+#include "AbstractStringAppender.h"
 
 // Qt
 #include <QFile>
 #include <QTextStream>
 
+DLOG_CORE_BEGIN_NAMESPACE
 
-class CUTELOGGERSHARED_EXPORT FileAppender : public AbstractStringAppender
+class LIBDLOG_SHARED_EXPORT FileAppender : public AbstractStringAppender
 {
-  public:
-    FileAppender(const QString& fileName = QString());
+public:
+    FileAppender(const QString &fileName = QString());
     ~FileAppender();
 
     QString fileName() const;
-    void setFileName(const QString&);
+    void setFileName(const QString &s);
 
-    bool flushOnWrite() const;
-    void setFlushOnWrite(bool);
+    qint64 size() const;
 
-    bool flush();
-
-    bool reopenFile();
-
-  protected:
-    virtual void append(const QDateTime& timeStamp, Logger::LogLevel logLevel, const char* file, int line,
-                        const char* function, const QString& category, const QString& message);
+protected:
+    virtual void append(const QDateTime &time, Logger::LogLevel level, const char *file, int line,
+                        const char *func, const QString &category, const QString &msg);
     bool openFile();
     void closeFile();
 
-  private:
+private:
     QFile m_logFile;
-    bool m_flushOnWrite;
     QTextStream m_logStream;
     mutable QMutex m_logFileMutex;
 };
+
+DLOG_CORE_END_NAMESPACE
 
 #endif // FILEAPPENDER_H

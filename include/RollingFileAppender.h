@@ -1,9 +1,14 @@
-#ifndef ROLLINGFILEAPPENDER_H
-#define ROLLINGFILEAPPENDER_H
+/*
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Lesser General Public License version 2.1
+  as published by the Free Software Foundation and appearing in the file
+  LICENSE.LGPL included in the packaging of this file.
 
-#include <QDateTime>
-
-#include <FileAppender.h>
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU Lesser General Public License for more details.
+*/
 
 /*!
  * \brief The RollingFileAppender class extends FileAppender so that the underlying file is rolled over at a user chosen frequency.
@@ -19,59 +24,72 @@
  * (so no more than logFilesLimit recent log files exist in the directory at any moment).
  * \sa setDatePattern(DatePattern), setLogFilesLimit(int)
  */
-class CUTELOGGERSHARED_EXPORT RollingFileAppender : public FileAppender
+
+#ifndef ROLLINGFILEAPPENDER_H
+#define ROLLINGFILEAPPENDER_H
+
+#include <QDateTime>
+
+#include "FileAppender.h"
+
+DLOG_CORE_BEGIN_NAMESPACE
+
+class LIBDLOG_SHARED_EXPORT RollingFileAppender : public FileAppender
 {
-  public:
-    /*!
-     * The enum DatePattern defines constants for date patterns.
-     * \sa setDatePattern(DatePattern)
-     */
-    enum DatePattern
-    {
-      /*! The minutely date pattern string is "'.'yyyy-MM-dd-hh-mm". */
-      MinutelyRollover = 0,
-      /*! The hourly date pattern string is "'.'yyyy-MM-dd-hh". */
-      HourlyRollover,
-      /*! The half-daily date pattern string is "'.'yyyy-MM-dd-a". */
-      HalfDailyRollover,
-      /*! The daily date pattern string is "'.'yyyy-MM-dd". */
-      DailyRollover,
-      /*! The weekly date pattern string is "'.'yyyy-ww". */
-      WeeklyRollover,
-      /*! The monthly date pattern string is "'.'yyyy-MM". */
-      MonthlyRollover
-    };
-    Q_ENUMS(DatePattern)
+public:
+  /*!
+  @~english
+  The enum DatePattern defines constants for date patterns.
+  \sa setDatePattern(DatePattern)
+   */
+  enum DatePattern
+  {
 
-    RollingFileAppender(const QString& fileName = QString());
+    MinutelyRollover = 0, /*!<@~english The minutely date pattern string is "'.'yyyy-MM-dd-hh-mm". */
+    HourlyRollover,       /*!<@~english The hourly date pattern string is "yyyy-MM-dd-hh". */
+    HalfDailyRollover,    /*!<@~english The half-daily date pattern string is "'.'yyyy-MM-dd-a". */
+    DailyRollover,        /*!<@~english The daily date pattern string is "'.'yyyy-MM-dd". */
+    WeeklyRollover,       /*!<@~english The weekly date pattern string is "'.'yyyy-ww". */
+    MonthlyRollover       /*!<@~english The monthly date pattern string is "'.'yyyy-MM". */
+  };
 
-    DatePattern datePattern() const;
-    void setDatePattern(DatePattern datePattern);
-    void setDatePattern(const QString& datePattern);
+  RollingFileAppender(const QString &fileName = QString());
 
-    QString datePatternString() const;
+  DatePattern datePattern() const;
+  void setDatePattern(DatePattern datePattern);
+  QT_DEPRECATED_X("use setDatePattern(DatePattern)")
+  void setDatePattern(const QString &datePattern);
 
-    void setLogFilesLimit(int limit);
-    int logFilesLimit() const;
+  QT_DEPRECATED_X("use datePattern(DatePattern)")
+  QString datePatternString() const;
 
-  protected:
-    virtual void append(const QDateTime& timeStamp, Logger::LogLevel logLevel, const char* file, int line,
-                        const char* function, const QString& category, const QString& message);
+  void setLogFilesLimit(int limit);
+  int logFilesLimit() const;
 
-  private:
-    void rollOver();
-    void computeRollOverTime();
-    void computeFrequency();
-    void removeOldFiles();
-    void setDatePatternString(const QString& datePatternString);
+  void setLogSizeLimit(int limit);
+  qint64 logSizeLimit() const;
 
-    QString m_datePatternString;
-    DatePattern m_frequency;
+protected:
+  virtual void append(const QDateTime &time, Logger::LogLevel level, const char *file, int line,
+                      const char *func, const QString &category, const QString &msg);
 
-    QDateTime m_rollOverTime;
-    QString m_rollOverSuffix;
-    int m_logFilesLimit;
-    mutable QMutex m_rollingMutex;
+private:
+  void rollOver();
+  void computeRollOverTime();
+  void computeFrequency();
+  void removeOldFiles();
+  void setDatePatternString(const QString &datePatternString);
+
+  QString m_datePatternString;
+  DatePattern m_frequency;
+
+  QDateTime m_rollOverTime;
+  QString m_rollOverSuffix;
+  int m_logFilesLimit;
+  qint64 m_logSizeLimit;
+  mutable QMutex m_rollingMutex;
 };
+
+DLOG_CORE_END_NAMESPACE
 
 #endif // ROLLINGFILEAPPENDER_H

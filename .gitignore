@@ -34,9 +34,12 @@ Makefile.Release
 # Generated doxygen documentation
 
 doc/
+# build 
+build/
 
 # IDE
 
 *.pro.user
 *.pro.user.*
 CMakeLists.txt.user
+.vscode

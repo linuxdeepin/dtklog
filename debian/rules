@@ -22,7 +22,7 @@ endif
 	dh $@
 
 override_dh_auto_configure:
-	dh_auto_configure ---DCUTE_LOGGER_VERSION=$(PACK_VER)
+	dh_auto_configure -- -DDLOG_VERSION=$(PACK_VER) -DBUILD_WITH_SYSTEMD=ON
 
 override_dh_makeshlibs:
-	dh_makeshlibs -V "libcutlogger (>= $(shell echo $(VERSION) | cut -d '.' -f 1,2))"
+	dh_makeshlibs -V "libdtklog (>= $(shell echo $(VERSION) | cut -d '.' -f 1,2))"

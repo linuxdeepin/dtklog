@@ -1,249 +1,135 @@
+/*
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Lesser General Public License version 2.1
+  as published by the Free Software Foundation and appearing in the file
+  LICENSE.LGPL included in the packaging of this file.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU Lesser General Public License for more details.
+*/
+
 #include <QDateTime>
 #include <QDir>
 #include <QFileInfo>
 
 #include "RollingFileAppender.h"
 
+#include "rollingfilesink_p.h"
 
-RollingFileAppender::RollingFileAppender(const QString& fileName)
-  : FileAppender(fileName)
-  , m_frequency(DailyRollover)
-  , m_logFilesLimit(0)
-{}
+DLOG_CORE_BEGIN_NAMESPACE
+extern std::string loggerName(const QFile &logFile);
+/*!
+@~english
+  @class Dtk::Core::RollingFileAppender
+  @ingroup dlog
+  @brief The RollingFileAppender class extends FileAppender so that the underlying file is rolled over at a user chosen frequency.
 
+  The class is based on Log4Qt.DailyRollingFileAppender class (http://log4qt.sourceforge.net/)
+  and has the same date pattern format.
 
-void RollingFileAppender::append(const QDateTime& timeStamp, Logger::LogLevel logLevel, const char* file, int line,
-    const char* function, const QString& category, const QString& message)
+  For example, if the fileName is set to /foo/bar and the DatePattern set to the daily rollover ('.'yyyy-MM-dd'.log'), on 2014-02-16 at midnight,
+  the logging file /foo/bar.log will be copied to /foo/bar.2014-02-16.log and logging for 2014-02-17 will continue in /foo/bar
+  until it rolls over the next day.
+
+  The logFilesLimit parameter is used to automatically delete the oldest log files in the directory during rollover
+  (so no more than logFilesLimit recent log files exist in the directory at any moment).
+ */
+
+RollingFileAppender::RollingFileAppender(const QString &fileName)
+    : FileAppender(fileName)
 {
-  if (!m_rollOverTime.isNull() && QDateTime::currentDateTime() > m_rollOverTime)
-    rollOver();
-
-  FileAppender::append(timeStamp, logLevel, file, line, function, category, message);
+    setLogFilesLimit(1);
+    setLogSizeLimit(1024 * 1024 * 20);
 }
 
+void RollingFileAppender::append(const QDateTime &time, Logger::LogLevel level, const char *file, int line,
+                                 const char *func, const QString &category, const QString &msg)
+{
+    FileAppender::append(time, level, file, line, func, category, msg);
+}
 
 RollingFileAppender::DatePattern RollingFileAppender::datePattern() const
 {
-  QMutexLocker locker(&m_rollingMutex);
-  return m_frequency;
+    QMutexLocker locker(&m_rollingMutex);
+    return m_frequency;
 }
-
 
 QString RollingFileAppender::datePatternString() const
 {
-  QMutexLocker locker(&m_rollingMutex);
-  return m_datePatternString;
+    QMutexLocker locker(&m_rollingMutex);
+    return m_datePatternString;
 }
-
 
 void RollingFileAppender::setDatePattern(DatePattern datePattern)
 {
-  switch (datePattern)
-  {
-    case MinutelyRollover:
-      setDatePatternString(QLatin1String("'.'yyyy-MM-dd-hh-mm"));
-      break;
-    case HourlyRollover:
-      setDatePatternString(QLatin1String("'.'yyyy-MM-dd-hh"));
-      break;
-    case HalfDailyRollover:
-      setDatePatternString(QLatin1String("'.'yyyy-MM-dd-a"));
-      break;
-    case DailyRollover:
-      setDatePatternString(QLatin1String("'.'yyyy-MM-dd"));
-      break;
-    case WeeklyRollover:
-      setDatePatternString(QLatin1String("'.'yyyy-ww"));
-      break;
-    case MonthlyRollover:
-      setDatePatternString(QLatin1String("'.'yyyy-MM"));
-      break;
-    default:
-      Q_ASSERT_X(false, "DailyRollingFileAppender::setDatePattern()", "Invalid datePattern constant");
-      setDatePattern(DailyRollover);
-  };
+    QMutexLocker locker(&m_rollingMutex);
+    m_frequency = datePattern;
 
-  QMutexLocker locker(&m_rollingMutex);
-  m_frequency = datePattern;
-
-  computeRollOverTime();
+    computeRollOverTime();
 }
 
-
-void RollingFileAppender::setDatePattern(const QString& datePattern)
+void RollingFileAppender::setDatePattern(const QString & /*datePattern*/)
 {
-  setDatePatternString(datePattern);
-  computeFrequency();
-
-  computeRollOverTime();
 }
 
-
-void RollingFileAppender::setDatePatternString(const QString& datePatternString)
+void RollingFileAppender::setDatePatternString(const QString & /*datePatternString*/)
 {
-  QMutexLocker locker(&m_rollingMutex);
-  m_datePatternString = datePatternString;
 }
-
 
 void RollingFileAppender::computeFrequency()
 {
-  QMutexLocker locker(&m_rollingMutex);
-
-  const QDateTime startTime(QDate(1999, 1, 1), QTime(0, 0));
-  const QString startString = startTime.toString(m_datePatternString);
-
-  if (startString != startTime.addSecs(60).toString(m_datePatternString))
-    m_frequency = MinutelyRollover;
-  else if (startString != startTime.addSecs(60 * 60).toString(m_datePatternString))
-    m_frequency = HourlyRollover;
-  else if (startString != startTime.addSecs(60 * 60 * 12).toString(m_datePatternString))
-    m_frequency = HalfDailyRollover;
-  else if (startString != startTime.addDays(1).toString(m_datePatternString))
-    m_frequency = DailyRollover;
-  else if (startString != startTime.addDays(7).toString(m_datePatternString))
-    m_frequency = WeeklyRollover;
-  else if (startString != startTime.addMonths(1).toString(m_datePatternString))
-    m_frequency = MonthlyRollover;
-  else
-  {
-    Q_ASSERT_X(false, "DailyRollingFileAppender::computeFrequency", "The pattern '%1' does not specify a frequency");
-    return;
-  }
 }
-
 
 void RollingFileAppender::removeOldFiles()
 {
-  if (m_logFilesLimit <= 1)
-    return;
-
-  QFileInfo fileInfo(fileName());
-  QDir logDirectory(fileInfo.absoluteDir());
-  logDirectory.setFilter(QDir::Files);
-  logDirectory.setNameFilters(QStringList() << fileInfo.fileName() + "*");
-  QFileInfoList logFiles = logDirectory.entryInfoList();
-
-  QMap<QDateTime, QString> fileDates;
-  for (int i = 0; i < logFiles.length(); ++i)
-  {
-    QString name = logFiles[i].fileName();
-    QString suffix = name.mid(name.indexOf(fileInfo.fileName()) + fileInfo.fileName().length());
-    QDateTime fileDateTime = QDateTime::fromString(suffix, datePatternString());
-
-    if (fileDateTime.isValid())
-      fileDates.insert(fileDateTime, logFiles[i].absoluteFilePath());
-  }
-
-  QList<QString> fileDateNames = fileDates.values();
-  for (int i = 0; i < fileDateNames.length() - m_logFilesLimit + 1; ++i)
-    QFile::remove(fileDateNames[i]);
 }
-
 
 void RollingFileAppender::computeRollOverTime()
 {
-  Q_ASSERT_X(!m_datePatternString.isEmpty(), "DailyRollingFileAppender::computeRollOverTime()", "No active date pattern");
-
-  QDateTime now = QDateTime::currentDateTime();
-  QDate nowDate = now.date();
-  QTime nowTime = now.time();
-  QDateTime start;
-
-  switch (m_frequency)
-  {
-    case MinutelyRollover:
+    if (auto *fs = get_sink<rolling_file_sink_mt>(loggerName(fileName())))
     {
-      start = QDateTime(nowDate, QTime(nowTime.hour(), nowTime.minute(), 0, 0));
-      m_rollOverTime = start.addSecs(60);
+        return fs->set_interval(RollingInterval(m_frequency));
     }
-    break;
-    case HourlyRollover:
-    {
-      start = QDateTime(nowDate, QTime(nowTime.hour(), 0, 0, 0));
-      m_rollOverTime = start.addSecs(60*60);
-    }
-    break;
-    case HalfDailyRollover:
-    {
-      int hour = nowTime.hour();
-      if (hour >=  12)
-        hour = 12;
-      else
-        hour = 0;
-      start = QDateTime(nowDate, QTime(hour, 0, 0, 0));
-      m_rollOverTime = start.addSecs(60*60*12);
-    }
-    break;
-    case DailyRollover:
-    {
-      start = QDateTime(nowDate, QTime(0, 0, 0, 0));
-      m_rollOverTime = start.addDays(1);
-    }
-    break;
-    case WeeklyRollover:
-    {
-      // Qt numbers the week days 1..7. The week starts on Monday.
-      // Change it to being numbered 0..6, starting with Sunday.
-      int day = nowDate.dayOfWeek();
-      if (day == Qt::Sunday)
-        day = 0;
-      start = QDateTime(nowDate, QTime(0, 0, 0, 0)).addDays(-1 * day);
-      m_rollOverTime = start.addDays(7);
-    }
-    break;
-    case MonthlyRollover:
-    {
-      start = QDateTime(QDate(nowDate.year(), nowDate.month(), 1), QTime(0, 0, 0, 0));
-      m_rollOverTime = start.addMonths(1);
-    }
-    break;
-    default:
-      Q_ASSERT_X(false, "DailyRollingFileAppender::computeInterval()", "Invalid datePattern constant");
-      m_rollOverTime = QDateTime::fromTime_t(0);
-  }
-
-  m_rollOverSuffix = start.toString(m_datePatternString);
-  Q_ASSERT_X(now.toString(m_datePatternString) == m_rollOverSuffix,
-      "DailyRollingFileAppender::computeRollOverTime()", "File name changes within interval");
-  Q_ASSERT_X(m_rollOverSuffix != m_rollOverTime.toString(m_datePatternString),
-      "DailyRollingFileAppender::computeRollOverTime()", "File name does not change with rollover");
 }
-
 
 void RollingFileAppender::rollOver()
 {
-  Q_ASSERT_X(!m_datePatternString.isEmpty(), "DailyRollingFileAppender::rollOver()", "No active date pattern");
-
-  QString rollOverSuffix = m_rollOverSuffix;
-  computeRollOverTime();
-  if (rollOverSuffix == m_rollOverSuffix)
-    return;
-
-  closeFile();
-
-  QString targetFileName = fileName() + rollOverSuffix;
-  QFile f(targetFileName);
-  if (f.exists() && !f.remove())
-    return;
-  f.setFileName(fileName());
-  if (!f.rename(targetFileName))
-    return;
-
-  openFile();
-  removeOldFiles();
 }
-
 
 void RollingFileAppender::setLogFilesLimit(int limit)
 {
-  QMutexLocker locker(&m_rollingMutex);
-  m_logFilesLimit = limit;
-}
+    QMutexLocker locker(&m_rollingMutex);
+    m_logFilesLimit = limit;
 
+    if (auto *fs = get_sink<rolling_file_sink_mt>(loggerName(fileName())))
+    {
+        return fs->set_max_files(std::size_t(limit));
+    }
+}
 
 int RollingFileAppender::logFilesLimit() const
 {
-  QMutexLocker locker(&m_rollingMutex);
-  return m_logFilesLimit;
+    QMutexLocker locker(&m_rollingMutex);
+    return m_logFilesLimit;
 }
+
+void RollingFileAppender::setLogSizeLimit(int limit)
+{
+    QMutexLocker locker(&m_rollingMutex);
+    m_logSizeLimit = limit;
+
+    if (auto *fs = get_sink<rolling_file_sink_mt>(loggerName(fileName())))
+    {
+        return fs->set_max_size(std::size_t(limit));
+    }
+}
+
+qint64 RollingFileAppender::logSizeLimit() const
+{
+    QMutexLocker locker(&m_rollingMutex);
+    return m_logSizeLimit;
+}
+
+DLOG_CORE_END_NAMESPACE

@@ -14,33 +14,34 @@
 #ifndef ABSTRACTSTRINGAPPENDER_H
 #define ABSTRACTSTRINGAPPENDER_H
 
-// Local
-#include "CuteLogger_global.h"
-#include <AbstractAppender.h>
+#include "AbstractAppender.h"
 
-// Qt
 #include <QReadWriteLock>
+#include <QDateTime>
 
+DLOG_CORE_BEGIN_NAMESPACE
 
-class CUTELOGGERSHARED_EXPORT AbstractStringAppender : public AbstractAppender
+class LIBDLOG_SHARED_EXPORT AbstractStringAppender : public AbstractAppender
 {
-  public:
+public:
     AbstractStringAppender();
-
     virtual QString format() const;
-    void setFormat(const QString&);
+    void setFormat(const QString &format);
 
-    static QString stripFunctionName(const char*);
+    static QString stripFunctionName(const char *name);
 
-  protected:
-    QString formattedString(const QDateTime& timeStamp, Logger::LogLevel logLevel, const char* file, int line,
-                            const char* function, const QString& category, const QString& message) const;
+protected:
+    QString formattedString(const QDateTime &time, Logger::LogLevel level, const char *file, int line,
+                            const char *func, const QString &category, const QString &msg) const;
+    QString formattedString(const QDateTime &time, Logger::LogLevel level, const char *file, int line,
+                            const char *func, const QString &category, const QString &msg, bool withcolor) const;
 
-  private:
-    static QByteArray qCleanupFuncinfo(const char*);
+private:
+    static QByteArray qCleanupFuncinfo(const char *);
 
     QString m_format;
     mutable QReadWriteLock m_formatLock;
 };
 
+DLOG_CORE_END_NAMESPACE
 #endif // ABSTRACTSTRINGAPPENDER_H
