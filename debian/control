@@ -1,0 +1,19 @@
+Source: dtkcore
+Section: libdevel
+Priority: optional
+Maintainer: Deepin Packages Builder <packages@deepin.com>
+Build-Depends: debhelper-compat ( =12), pkg-config, qtbase5-dev, cmake
+Standards-Version: 3.9.8
+
+Package: libcutlogger
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Multi-Arch: same
+Description: Simple, convinient and thread safe logger for Qt-based C++ apps.
+ This package contains the shared libraries.
+
+Package: libcutlogger-dev
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libcutlogger( =${binary:Version})
+Description: Simple, convinient and thread safe logger for Qt-based C++ apps.
+ This package contains the header files and static libraries of CuteLogger

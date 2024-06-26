@@ -3,7 +3,13 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
 SET(CMAKE_CXX_STANDARD 11)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-PROJECT(CuteLogger)
+set (CUTE_LOGGER_VERSION "0.0.1" CACHE STRING "define project version")
+
+PROJECT(CuteLogger
+ VERSION ${CUTE_LOGGER_VERSION}
+ DESCRIPTION "Simple, convinient and thread safe logger for Qt-based C++ apps"
+  LANGUAGES CXX
+)
 
 FIND_PACKAGE(Qt5Core REQUIRED)
 
@@ -30,6 +36,9 @@ SET(includes
   include/RollingFileAppender.h
 )
 
+include(GNUInstallDirs)
+SET (INCLUDE_INSTALL_DIR "${CMAKE_INSTALL_INCLUDEDIR}/CuteLogger")
+SET (LIBRARY_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}")
 
 # OutputDebugAppender is only for Windows systems
 IF(WIN32)
@@ -37,14 +46,24 @@ IF(WIN32)
   SET(includes ${includes} include/OutputDebugAppender.h)
 ENDIF(WIN32)
 
-
 SET(library_target CuteLogger)
 
 ADD_LIBRARY(${library_target} SHARED ${sources} ${includes})
+
+set_target_properties(${library_target} PROPERTIES
+  VERSION ${CMAKE_PROJECT_VERSION}
+  SOVERSION ${CMAKE_PROJECT_VERSION_MAJOR}
+  EXPORT_NAME Core
+)
+
 TARGET_LINK_LIBRARIES(${library_target} Qt5::Core)
 TARGET_INCLUDE_DIRECTORIES(${library_target} PUBLIC include)
 
-INSTALL(TARGETS ${library_target} DESTINATION lib)
+INSTALL(TARGETS ${library_target} DESTINATION  ${CONFIG_CMAKE_INSTALL_DIR})
+
+INSTALL(FILES ${includes} DESTINATION "${INCLUDE_INSTALL_DIR}")
+configure_file(misc/CuteLogger.pc.in CuteLogger.pc @ONLY)
+INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/CuteLogger.pc DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
 
 SET(ENABLE_TESTS OFF CACHE BOOL "Enable building CuteLogger tests")
 IF (ENABLE_TESTS)
