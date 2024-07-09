@@ -639,7 +639,8 @@ Logger::~Logger()
     appendersLocker.unlock();
 
     delete d_ptr;
-    if (globalInstance() == this)
+    if (!LoggerPrivate::globalInstance ||
+        LoggerPrivate::globalInstance == this)
     {
         spdlog::shutdown();
     }
