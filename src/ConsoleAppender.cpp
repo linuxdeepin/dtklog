@@ -86,7 +86,9 @@ void ConsoleAppender::append(const QDateTime &time, Logger::LogLevel level, cons
                              const char *func, const QString &category, const QString &msg)
 {
     auto clogger = spdlog::get("console");
-    Q_ASSERT(clogger);
+    if (Q_UNLIKELY(!clogger))
+        return;
+
     clogger->set_level(spdlog::level::level_enum(detailsLevel()));
 
     const auto &formatted = formattedString(time, level, file, line, func, category, msg, isatty(STDOUT_FILENO));
