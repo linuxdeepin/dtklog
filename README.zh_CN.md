@@ -1,8 +1,8 @@
 # DtkLog
 
-Simple, convinient and thread safe logger for Qt-based C++ apps
+`DtkLog` 是基于 `Qt5` 的 `C++`` 应用的简单、便捷、线程安全日志库
 
-## Short example
+## 简单示例
 
 ```cpp
 #include <QCoreApplication>
@@ -28,12 +28,9 @@ int main(int argc, char *argv[])
 }
 ```
 
-## Adding DtkLog to your project
+## 项目中引入 DtkLog 
 
-Add this repo as a git submodule to your project. 
-
-
-Include it to your CMakeLists.txt file:
+CMakeLists.txt 文件:
 ```cmake
 find_package(DtkLog REQUIRED)
 ...
@@ -42,7 +39,7 @@ find_package(DtkLog REQUIRED)
 TARGET_LINK_LIBRARIES(${your_target} ... Dtk::Log)
 ```
 
-Include `dloghelper.h` and one or several appenders of your choice:
+包含 `dloghelper.h` 然后根据需要的 appender 包含头文件:
 ```cpp
 #include <dloghelper.h>
 #include <ConsoleAppender.h>
