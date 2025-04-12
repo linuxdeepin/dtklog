@@ -88,7 +88,7 @@ void RollingFileAppender::removeOldFiles()
 
 void RollingFileAppender::computeRollOverTime()
 {
-    if (auto *fs = get_sink<rolling_file_sink_mt>(loggerName(fileName())))
+    if (auto *fs = get_sink<rolling_file_sink_mt>(loggerName(QFile(fileName()))))
     {
         return fs->set_interval(RollingInterval(m_frequency));
     }
@@ -103,7 +103,7 @@ void RollingFileAppender::setLogFilesLimit(int limit)
     QMutexLocker locker(&m_rollingMutex);
     m_logFilesLimit = limit;
 
-    if (auto *fs = get_sink<rolling_file_sink_mt>(loggerName(fileName())))
+    if (auto *fs = get_sink<rolling_file_sink_mt>(loggerName(QFile(fileName()))))
     {
         return fs->set_max_files(std::size_t(limit));
     }
@@ -120,7 +120,7 @@ void RollingFileAppender::setLogSizeLimit(int limit)
     QMutexLocker locker(&m_rollingMutex);
     m_logSizeLimit = limit;
 
-    if (auto *fs = get_sink<rolling_file_sink_mt>(loggerName(fileName())))
+    if (auto *fs = get_sink<rolling_file_sink_mt>(loggerName(QFile(fileName()))))
     {
         return fs->set_max_size(std::size_t(limit));
     }

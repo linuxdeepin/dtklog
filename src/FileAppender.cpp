@@ -76,8 +76,8 @@ void FileAppender::setFileName(const QString &s)
 
     m_logFile.setFileName(s);
 
-    if (!spdlog::get(loggerName(s)))
-        rolling_logger_mt(loggerName(s),
+    if (!spdlog::get(loggerName(QFile(s))))
+        rolling_logger_mt(loggerName(QFile(s)),
                           m_logFile.fileName().toStdString(),
                           1024 * 1024 * 20, 0);
 }
