@@ -1,3 +1,9 @@
+dtklog (0.0.3) unstable; urgency=medium
+
+  * fix: resolve compilation issues on Qt 6.9
+
+ -- JiDe Zhang <zhangjide@deepin.org>  Fri, 12 Apr 2025 14:00:00 +0800
+
 dtklog (0.0.2) unstable; urgency=medium
 
   * release 0.0.2
