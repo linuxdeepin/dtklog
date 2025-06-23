@@ -1,3 +1,9 @@
+dtklog (0.0.4) unstable; urgency=medium
+
+  * Release 0.0.4
+
+ -- yeshanshan <yeshanshan@uniontech.com>  Mon, 23 Jun 2025 14:52:44 +0800
+
 dtklog (0.0.3) unstable; urgency=medium
 
   * fix: resolve compilation issues on Qt 6.9
