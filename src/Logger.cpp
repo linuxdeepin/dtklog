@@ -273,14 +273,13 @@ DLOG_CORE_BEGIN_NAMESPACE
 
   Usage example:
   \code
-  class CustomClass : public QObject
+  class CustomClass
   {
-    Q_OBJECT
     dCategory("custom_category")
     ...
   };
 
-  CustomClass::CustomClass(QObject* parent) : QObject(parent)
+  CustomClass::CustomClass()
   {
     dlogger->registerAppender(new FileAppender("custom_category_log"));
     dTrace() << "Trace to the custom category log";
@@ -1053,7 +1052,7 @@ public:
     {
     }
 
-    Q_DECL_CONSTEXPR CuteMessageLogger(Logger *l, Logger::LogLevel, const char *,
+    Q_DECL_CONSTEXPR CuteMessageLogger(Logger *, Logger::LogLevel, const char *,
                                        int, const char *, const char *)
     {
     }
@@ -1078,4 +1077,3 @@ QDebug CuteMessageLogger::write() const
 }
 
 DLOG_CORE_END_NAMESPACE
-#include "Logger.moc"
