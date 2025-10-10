@@ -98,6 +98,13 @@ SET_TARGET_PROPERTIES(${library_target} PROPERTIES
 )
 
 TARGET_LINK_LIBRARIES(${library_target} PUBLIC Qt${QT_VERSION_MAJOR}::Core)
+
+if("${QT_VERSION_MAJOR}" STREQUAL "6")
+  if ("${Qt6Core_VERSION}" VERSION_GREATER_EQUAL 6.10.0)
+    find_package(Qt6 REQUIRED COMPONENTS CorePrivate)
+  endif()
+endif()
+
 TARGET_LINK_LIBRARIES(${library_target} PRIVATE
   Qt${QT_VERSION_MAJOR}::CorePrivate
   spdlog::spdlog
