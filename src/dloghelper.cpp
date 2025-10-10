@@ -17,7 +17,7 @@ class DLogHelperPrivate : public QObjectPrivate
 {
 public:
     // Functions.
-    explicit DLogHelperPrivate(int version = QObjectPrivateVersion)
+    explicit DLogHelperPrivate(decltype(QObjectPrivateVersion) version = QObjectPrivateVersion)
         : QObjectPrivate(version)
     {
     }
