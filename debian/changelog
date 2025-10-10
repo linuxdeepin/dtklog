@@ -1,3 +1,11 @@
+dtklog (0.0.6) unstable; urgency=medium
+
+  * feat: support Qt 6.10
+  * fix: remove unnecessary QObject dependencies in Logger
+  * chore(CI): add debian check workflow
+
+ -- YeShanShan <yeshanshan@uniontech.com>  Fri, 10 Oct 2025 17:53:41 +0800
+
 dtklog (0.0.5) unstable; urgency=medium
 
   * Release 0.0.5
