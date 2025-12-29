@@ -24,9 +24,8 @@ build() {
     -DCMAKE_INSTALL_LIBDIR=lib \
     -DMKSPECS_INSTALL_DIR=lib/qt/mkspecs/modules \
     -DCMAKE_INSTALL_PREFIX=/usr \
-    -DCMAKE_BUILD_TYPE=Release \
     -DBUILD_WITH_SYSTEMD=ON \
-    -DDLOG_VERSION=$version
+    -DDTK5=ON
   ninja
 }
 

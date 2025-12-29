@@ -1,0 +1,5 @@
+usr/include/dtk6/
+usr/lib/*/libdtk6log.so
+usr/lib/*/pkgconfig/dtk6log.pc
+usr/lib/*/qt6/mkspecs/
+usr/lib/*/cmake/Dtk6Log/

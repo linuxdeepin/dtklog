@@ -1,19 +1,46 @@
 Source: dtklog
 Section: libdevel
 Priority: optional
-Maintainer: Deepin Packages Builder <packages@deepin.com>
-Build-Depends: debhelper-compat ( =12), pkg-config, qtbase5-private-dev, cmake, libspdlog-dev, libsystemd-dev
+Maintainer: Shanshan Ye <yeshanshan@uniontech.com>
+Build-Depends: debhelper-compat ( =12),
+    cmake,
+    pkg-config,
+    libspdlog-dev,
+    libsystemd-dev,
+    qtbase5-dev <!nodtk5>,
+    qtbase5-private-dev <!nodtk5>,
+    qt6-base-dev <!nodtk6>,
+    qt6-base-private-dev <!nodtk6>
 Standards-Version: 3.9.8
+
+Package: libdtk6log
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Multi-Arch: same
+Build-Profiles: <!nodtk6>
+Description: Simple, convinient and thread safe logger for Qt-based C++ apps (DTK6 with Qt6)
+ This package contains the shared libraries.
+
+Package: libdtk6log-dev
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends},
+ libdtk6log( =${binary:Version})
+Build-Profiles: <!nodtk6>
+Description: Simple, convinient and thread safe logger for Qt-based C++ apps (DTK6 with Qt6)
+ This package contains the header files and static libraries of dlog
 
 Package: libdtklog
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Multi-Arch: same
-Description: Simple, convinient and thread safe logger for Qt-based C++ apps.
+Build-Profiles: <!nodtk5>
+Description: Simple, convinient and thread safe logger for Qt-based C++ apps (DTK5 with Qt5)
  This package contains the shared libraries.
 
 Package: libdtklog-dev
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libdtklog( =${binary:Version})
-Description: Simple, convinient and thread safe logger for Qt-based C++ apps.
+Depends: ${shlibs:Depends}, ${misc:Depends},
+ libdtklog( =${binary:Version})
+Build-Profiles: <!nodtk5>
+Description: Simple, convinient and thread safe logger for Qt-based C++ apps (DTK5 with Qt5)
  This package contains the header files and static libraries of dlog
