@@ -11,11 +11,6 @@ export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed -Wl,-z,relro -Wl,-z,now -Wl,-z
 # reproducible 编译参数
 DEB_CMAKE_EXTRA_FLAGS += -DCMAKE_SKIP_BUILD_RPATH=ON
 
-# 版本映射：x.y.z -> 0.y.z 和 0.y.z
-DTK5_VERSION := $(shell echo $(DEB_VERSION_UPSTREAM) | sed -E 's/^[0-9]+(\.|[^0-9]|$$)/0\1/')
-DTK6_VERSION := $(shell echo $(DEB_VERSION_UPSTREAM) | sed -E 's/^[0-9]+(\.|[^0-9]|$$)/0\1/')
-DTK5_MAJOR_MINOR := $(shell echo $(DTK5_VERSION) | cut -d '.' -f 1,2)
-
 # Build-Profiles 控制
 BUILD_DTK5 := $(if $(filter nodtk5,$(DEB_BUILD_PROFILES)),OFF,ON)
 BUILD_DTK6 := $(if $(filter nodtk6,$(DEB_BUILD_PROFILES)),OFF,ON)
@@ -53,14 +48,6 @@ ifeq ($(BUILD_DTK5),ON)
 endif
 ifeq ($(BUILD_DTK6),ON)
 	dh_auto_install --builddirectory=build6
-endif
-
-override_dh_makeshlibs:
-ifeq ($(BUILD_DTK5),ON)
-	dh_makeshlibs -V "libdtklog (>= $(DTK5_MAJOR_MINOR))" -plibdtklog
-endif
-ifeq ($(BUILD_DTK6),ON)
-	dh_makeshlibs -V "libdtk6log (>= $(DTK6_VERSION))" -plibdtk6log
 endif
 
 override_dh_auto_clean:
