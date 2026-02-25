@@ -58,7 +58,3 @@ License: CC0-1.0
 Files: include/D*
 Copyright: None
 License: CC0-1.0
-
-Files: src/* include/*
-Copyright: UnionTech Software Technology Co., Ltd.
-License: LGPL-2.1-or-later
