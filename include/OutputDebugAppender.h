@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2010 Karl-Heinz Reichel (khreichel at googlemail dot com)
+//
+// SPDX-License-Identifier: LGPL-2.1-or-later
+
 /*
   Copyright (c) 2010 Karl-Heinz Reichel (khreichel at googlemail dot com)
 

@@ -1,5 +1,11 @@
+// SPDX-FileCopyrightText: 2012 Boris Moiseev (cyberbobs at gmail dot com)
+// SPDX-FileCopyrightText: 2026 UnionTech Software Technology Co., Ltd.
+//
+// SPDX-License-Identifier: LGPL-2.1-or-later
+
 /*
   Copyright (c) 2012 Boris Moiseev (cyberbobs at gmail dot com)
+  Copyright (c) 2026 UnionTech Software Technology Co., Ltd.
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU Lesser General Public License version 2.1
@@ -50,6 +56,9 @@ public:
 
   void registerAppender(AbstractAppender *appender);
   void registerCategoryAppender(const QString &category, AbstractAppender *appender);
+  
+  void unregisterAppender(AbstractAppender *appender);
+  void unregisterCategoryAppender(const QString &category, AbstractAppender *appender);
 
   QT_DEPRECATED_X("no longer take effect")
   void logToGlobalInstance(const QString &category, bool logToGlobal = false);

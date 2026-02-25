@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2010 Boris Moiseev (cyberbobs at gmail dot com)
+//
+// SPDX-License-Identifier: LGPL-2.1-or-later
+
 /*
   Copyright (c) 2010 Boris Moiseev (cyberbobs at gmail dot com)
 
