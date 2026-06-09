@@ -1,7 +1,7 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Upstream-Name: dlog
+Upstream-Name: dtklog
 Upstream-Contact: UnionTech Software Technology Co., Ltd. <>
-Source: https://github.com/linuxdeepin/dlog
+Source: https://github.com/linuxdeepin/dtklog
 
 # Sample paragraph, commented out:
 #
