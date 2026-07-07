@@ -18,11 +18,27 @@
 
 #include "AbstractStringAppender.h"
 
-#include <QRegularExpression>
 #include <QCoreApplication>
 #include <QThread>
 
 DLOG_CORE_BEGIN_NAMESPACE
+
+static bool removeLambdaSuffix(QByteArray *info)
+{
+    // Keep this dependency-light: it runs while logger/appender writes are serialized.
+    static constexpr char marker[] = "::<lambda(";
+    static constexpr int markerSize = sizeof(marker) - 1;
+    const int start = info->indexOf(marker);
+    if (start < 0)
+        return false;
+
+    const int end = info->lastIndexOf(")>");
+    if (end < start + markerSize)
+        return false;
+
+    info->remove(start, end + 2 - start);
+    return true;
+}
 
 inline static QString formattedLevelWithColor(Logger::LogLevel level, QString &msg)
 {
@@ -187,13 +203,8 @@ QByteArray AbstractStringAppender::qCleanupFuncinfo(const char *name)
     }
 
     bool hasLambda = false;
-    QRegularExpression lambdaRegex("::<lambda\\(.*\\)>");
-    QRegularExpressionMatch match = lambdaRegex.match(QString::fromLatin1(info));
-    if (match.hasMatch())
-    {
+    while (removeLambdaSuffix(&info))
         hasLambda = true;
-        info.remove(match.capturedStart(), match.capturedLength());
-    }
 
     // operator names with '(', ')', '<', '>' in it
     static const char operator_call[] = "operator()";
