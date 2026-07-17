@@ -90,10 +90,18 @@ SET(library_target dtk${DTK_NAME_SUFFIX}log)
 
 ADD_LIBRARY(${library_target} SHARED ${sources} ${includes})
 
-TARGET_INCLUDE_DIRECTORIES(${library_target} PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
-  "$<INSTALL_INTERFACE:${INCLUDE_INSTALL_DIR}>"
-)
+IF(WIN32)
+  # On Windows, use include/ subdirectory to avoid VERSION file shadowing <version> header
+  TARGET_INCLUDE_DIRECTORIES(${library_target} PUBLIC
+    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+    "$<INSTALL_INTERFACE:${INCLUDE_INSTALL_DIR}>"
+  )
+ELSE()
+  TARGET_INCLUDE_DIRECTORIES(${library_target} PUBLIC
+    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
+    "$<INSTALL_INTERFACE:${INCLUDE_INSTALL_DIR}>"
+  )
+ENDIF()
 
 TARGET_LINK_DIRECTORIES(${library_target} INTERFACE
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>"
@@ -114,10 +122,17 @@ if("${QT_VERSION_MAJOR}" STREQUAL "6")
   endif()
 endif()
 
-TARGET_LINK_LIBRARIES(${library_target} PRIVATE
-  Qt${QT_VERSION_MAJOR}::CorePrivate
-  spdlog::spdlog
-)
+IF(WIN32)
+  TARGET_LINK_LIBRARIES(${library_target} PRIVATE
+    Qt${QT_VERSION_MAJOR}::CorePrivate
+    spdlog::spdlog_header_only
+  )
+ELSE()
+  TARGET_LINK_LIBRARIES(${library_target} PRIVATE
+    Qt${QT_VERSION_MAJOR}::CorePrivate
+    spdlog::spdlog
+  )
+ENDIF()
 
 IF(BUILD_WITH_SYSTEMD)
   ADD_DEFINITIONS(-DBUILD_WITH_SYSTEMD)

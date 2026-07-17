@@ -16,7 +16,11 @@
   GNU Lesser General Public License for more details.
 */
 // Local
+#ifdef _WIN32
+#include "OutputDebugAppender.h"
+#else
 #include "win32/OutputDebugAppender.h"
+#endif
 
 #include <spdlog/sinks/msvc_sink.h>
 #include <spdlog/spdlog.h>
