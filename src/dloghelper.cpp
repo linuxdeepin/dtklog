@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
@@ -7,23 +7,18 @@
 
 #include <QCoreApplication>
 #include <QElapsedTimer>
-#include <private/qobject_p.h>
 
 #include <iostream>
 
 DLOG_CORE_BEGIN_NAMESPACE
 
-class DLogHelperPrivate : public QObjectPrivate
+struct DLogHelperData
 {
-public:
-    // Functions.
-    explicit DLogHelperPrivate(decltype(QObjectPrivateVersion) version = QObjectPrivateVersion)
-        : QObjectPrivate(version)
-    {
-    }
-    ~DLogHelperPrivate()
-    {
-    }
+    const char *file = nullptr;
+    const char *function = nullptr;
+    const char *category = nullptr;
+    int line = 0;
+    Logger::LogLevel level = Logger::LogLevel::Debug;
 
     void setContext(const QMessageLogContext &ctx)
     {
@@ -32,27 +27,19 @@ public:
         function = ctx.function;
         category = ctx.category;
     }
-    void setLevel(Logger::LogLevel lvl)
-    {
-        level = lvl;
-    }
-
-    const char *file = nullptr;
-    const char *function = nullptr;
-    const char *category = nullptr;
-    int line = 0;
-    Logger::LogLevel level = Logger::LogLevel::Debug;
 };
 
 DLogHelper::DLogHelper(Logger::LogLevel level, const QMessageLogContext &context, QObject *parent)
-    : QObject(*new DLogHelperPrivate, parent)
+    : QObject(parent)
+    , m_data(new DLogHelperData)
 {
-    d_func()->setContext(context);
-    d_func()->setLevel(level);
+    m_data->setContext(context);
+    m_data->level = level;
 }
 
 DLogHelper::~DLogHelper()
 {
+    delete m_data;
 }
 
 void DLogHelper::write(const char *msg, ...)
@@ -68,16 +55,14 @@ void DLogHelper::write(const char *msg, ...)
 
 void DLogHelper::write(const QString &msg)
 {
-    Q_D(DLogHelper);
-    Logger::globalInstance()->write(d->level, d->file, d->line,
-                                    d->function, d->category, msg);
+    Logger::globalInstance()->write(m_data->level, m_data->file, m_data->line,
+                                    m_data->function, m_data->category, msg);
 }
 
 QDebug DLogHelper::write()
 {
-    Q_D(DLogHelper);
-    return Logger::globalInstance()->write(d->level, d->file, d->line,
-                                           d->function, d->category);
+    return Logger::globalInstance()->write(m_data->level, m_data->file, m_data->line,
+                                           m_data->function, m_data->category);
 }
 
 void DLogHelper::timing(const QString &msg, QObject *context /* = nullptr*/)
@@ -111,7 +96,7 @@ Logger::LogLevel DLogHelper::levelFromQtMsgType(QtMsgType mt)
     case QtDebugMsg:
         level = Logger::Debug;
         break;
-#if QT_VERSION >= 0x050500
+#if QT_VERSION >= QT_VERSION_CHECK(5, 5, 0)
     case QtInfoMsg:
         level = Logger::Info;
         break;
@@ -137,7 +122,7 @@ QtMsgType DLogHelper::qtMsgTypeFromLogLevel(Logger::LogLevel lvl)
     case Logger::Debug:
         mt = QtDebugMsg;
         break;
-#if QT_VERSION >= 0x050500
+#if QT_VERSION >= QT_VERSION_CHECK(5, 5, 0)
     case Logger::Info:
         mt = QtInfoMsg;
         break;
