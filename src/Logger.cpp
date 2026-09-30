@@ -30,6 +30,8 @@
 #include <QIODevice>
 
 #include <iostream>
+#include <atomic>
+#include <cstdio>
 #include <spdlog/spdlog.h>
 
 DLOG_CORE_BEGIN_NAMESPACE
@@ -525,8 +527,26 @@ public:
 Logger *LoggerPrivate::globalInstance = nullptr;
 QReadWriteLock LoggerPrivate::globalInstanceLock;
 
+// A Qt callback may already be in flight when QCoreApplication starts running
+// its post routines. Protect the whole callback, not just the singleton lookup.
+static QReadWriteLock qtMessageHandlerLock;
+static std::atomic<bool> qtMessageHandlerEnabled{false};
+static std::atomic<QtMessageHandler> previousQtMessageHandler{nullptr};
+static void qtLoggerMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg);
+
 static void cleanupLoggerGlobalInstance()
 {
+    {
+        QWriteLocker handlerLocker(&qtMessageHandlerLock);
+        qtMessageHandlerEnabled = false;
+        const auto handler = qInstallMessageHandler(previousQtMessageHandler.load());
+        if (handler != qtLoggerMessageHandler)
+            qInstallMessageHandler(handler);
+    }
+    // All active callbacks have finished; late callbacks now use the fallback.
+    // Do not hold the callback lock while appenders are destroyed: their
+    // destructors may log through a later-installed handler that chains to us.
+
     QWriteLocker locker(&LoggerPrivate::globalInstanceLock);
 
     delete LoggerPrivate::globalInstance;
@@ -536,6 +556,19 @@ static void cleanupLoggerGlobalInstance()
 #if QT_VERSION >= 0x050000
 static void qtLoggerMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
+    QReadLocker handlerLocker(&qtMessageHandlerLock);
+    if (!qtMessageHandlerEnabled) {
+        // Qt may have fetched our callback before it was uninstalled. Do not
+        // recreate the logger while application/platform objects are dying.
+        const auto handler = previousQtMessageHandler.load();
+        handlerLocker.unlock();
+        if (handler)
+            handler(type, context, msg);
+        else
+            std::fprintf(stderr, "%s\n", qPrintable(qFormatLogMessage(type, context, msg)));
+        return;
+    }
+
     Logger::LogLevel level = Logger::Warning;
     switch (type)
     {
@@ -670,10 +703,13 @@ Logger *Logger::globalInstance()
     if (!result)
     {
         QWriteLocker locker(&LoggerPrivate::globalInstanceLock);
+        if (LoggerPrivate::globalInstance)
+            return LoggerPrivate::globalInstance;
         LoggerPrivate::globalInstance = new Logger;
 
 #if QT_VERSION >= 0x050000
-        qInstallMessageHandler(qtLoggerMessageHandler);
+        qtMessageHandlerEnabled = true;
+        previousQtMessageHandler = qInstallMessageHandler(qtLoggerMessageHandler);
 #else
         qInstallMsgHandler(qtLoggerMessageHandler);
 #endif
