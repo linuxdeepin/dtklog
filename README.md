@@ -47,3 +47,16 @@ Include `dloghelper.h` and one or several appenders of your choice:
 #include <dloghelper.h>
 #include <ConsoleAppender.h>
 ```
+
+## Testing
+
+```shell
+cmake -S . -B build -DDTK5=OFF -DBUILD_TESTING=ON
+cmake --build build
+ctest --test-dir build --output-on-failure
+```
+
+Use `-DDTK5=ON` to test Qt5. The lifecycle tests cover concurrent singleton
+initialization and Qt message callbacks during application shutdown, including
+a later-installed handler that forwards to DtkLog. They use the build-tree
+library even when build RPATH is disabled.
