@@ -30,6 +30,7 @@
 #include <QIODevice>
 
 #include <iostream>
+#include <mutex>
 #include <spdlog/spdlog.h>
 
 DLOG_CORE_BEGIN_NAMESPACE
@@ -525,15 +526,26 @@ public:
 Logger *LoggerPrivate::globalInstance = nullptr;
 QReadWriteLock LoggerPrivate::globalInstanceLock;
 
+static void cleanupHandler()
+{
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    qInstallMessageHandler(nullptr);
+#else
+    qInstallMsgHandler(nullptr);
+#endif
+}
+
 static void cleanupLoggerGlobalInstance()
 {
     QWriteLocker locker(&LoggerPrivate::globalInstanceLock);
+    
+    cleanupHandler();
 
     delete LoggerPrivate::globalInstance;
     LoggerPrivate::globalInstance = nullptr;
 }
 
-#if QT_VERSION >= 0x050000
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 static void qtLoggerMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
     Logger::LogLevel level = Logger::Warning;
@@ -542,7 +554,7 @@ static void qtLoggerMessageHandler(QtMsgType type, const QMessageLogContext &con
     case QtDebugMsg:
         level = Logger::Debug;
         break;
-#if QT_VERSION >= 0x050500
+#if QT_VERSION >= QT_VERSION_CHECK(5, 5, 0)
     case QtInfoMsg:
         level = Logger::Info;
         break;
@@ -597,6 +609,11 @@ Logger::Logger()
 {
     Q_D(Logger);
     d->logDevice = new LogDevice(this);
+
+    static std::once_flag atexitFlag;
+    std::call_once(atexitFlag, []() {
+        std::atexit(cleanupHandler);
+    });
 }
 
 /*!
@@ -672,7 +689,7 @@ Logger *Logger::globalInstance()
         QWriteLocker locker(&LoggerPrivate::globalInstanceLock);
         LoggerPrivate::globalInstance = new Logger;
 
-#if QT_VERSION >= 0x050000
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
         qInstallMessageHandler(qtLoggerMessageHandler);
 #else
         qInstallMsgHandler(qtLoggerMessageHandler);
