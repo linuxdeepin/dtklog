@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2023 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
@@ -12,7 +12,7 @@
 #include <QDebug>
 
 DLOG_CORE_BEGIN_NAMESPACE
-class DLogHelperPrivate;
+struct DLogHelperData;
 class LIBDLOG_SHARED_EXPORT DLogHelper : public QObject
 {
     Q_DISABLE_COPY(DLogHelper)
@@ -29,7 +29,8 @@ public:
     static Logger::LogLevel levelFromQtMsgType(QtMsgType mt);
     static QtMsgType qtMsgTypeFromLogLevel(Logger::LogLevel lvl);
 
-    Q_DECLARE_PRIVATE(DLogHelper)
+private:
+    DLogHelperData *m_data;
 };
 
 DLOG_CORE_END_NAMESPACE
