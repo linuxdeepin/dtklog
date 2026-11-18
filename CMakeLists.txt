@@ -174,3 +174,22 @@ WRITE_BASIC_PACKAGE_VERSION_FILE(
 
 INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/${DLog}Config.cmake DESTINATION ${CONFIG_CMAKE_INSTALL_DIR})
 INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/${DLog}ConfigVersion.cmake DESTINATION ${CONFIG_CMAKE_INSTALL_DIR})
+
+INCLUDE(CTest)
+IF(BUILD_TESTING)
+  FIND_PACKAGE(Threads REQUIRED)
+  ADD_EXECUTABLE(logger-lifecycle-test tests/logger_lifecycle_test.cpp)
+  TARGET_LINK_LIBRARIES(logger-lifecycle-test PRIVATE ${library_target} Threads::Threads)
+  ADD_TEST(NAME logger-concurrent-initialization COMMAND logger-lifecycle-test initialize)
+  ADD_TEST(NAME logger-application-shutdown COMMAND logger-lifecycle-test shutdown)
+  ADD_TEST(NAME logger-chained-handler-shutdown COMMAND logger-lifecycle-test shutdown-chained)
+  SET_TESTS_PROPERTIES(logger-concurrent-initialization logger-application-shutdown
+    logger-chained-handler-shutdown
+    PROPERTIES TIMEOUT 15)
+  IF(UNIX AND NOT APPLE)
+    # Debian disables build RPATH. Test this build, not an installed DtkLog.
+    SET_TESTS_PROPERTIES(logger-concurrent-initialization logger-application-shutdown
+      logger-chained-handler-shutdown
+      PROPERTIES ENVIRONMENT "LD_LIBRARY_PATH=$<TARGET_FILE_DIR:${library_target}>")
+  ENDIF()
+ENDIF()

@@ -42,6 +42,14 @@ ifeq ($(BUILD_DTK6),ON)
 	dh_auto_build --builddirectory=build6
 endif
 
+override_dh_auto_test:
+ifeq ($(BUILD_DTK5),ON)
+	QT_SELECT=qt5 dh_auto_test --builddirectory=build5
+endif
+ifeq ($(BUILD_DTK6),ON)
+	dh_auto_test --builddirectory=build6
+endif
+
 override_dh_auto_install:
 ifeq ($(BUILD_DTK5),ON)
 	QT_SELECT=qt5 dh_auto_install --builddirectory=build5
