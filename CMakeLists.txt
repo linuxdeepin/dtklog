@@ -61,6 +61,8 @@ SET(sources
   src/RollingFileAppender.cpp
   src/dloghelper.cpp
   src/rollingfilesink_p.h
+  src/fileappender_p.h
+  src/rollingfile_p.h
 )
 
 SET(includes
@@ -98,6 +100,7 @@ IF(WIN32)
   )
 ELSE()
   TARGET_INCLUDE_DIRECTORIES(${library_target} PUBLIC
+    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
     "$<INSTALL_INTERFACE:${INCLUDE_INSTALL_DIR}>"
   )

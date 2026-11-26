@@ -20,10 +20,10 @@
 
 #include "RollingFileAppender.h"
 
-#include "rollingfilesink_p.h"
+#include "fileappender_p.h"
 
 DLOG_CORE_BEGIN_NAMESPACE
-extern std::string loggerName(const QFile &logFile);
+
 /*!
 @~english
   @class Dtk::Core::RollingFileAppender
@@ -42,8 +42,10 @@ extern std::string loggerName(const QFile &logFile);
  */
 
 RollingFileAppender::RollingFileAppender(const QString &fileName)
-    : FileAppender(fileName)
+    : FileAppender(fileName), m_frequency(DailyRollover),
+      m_logFilesLimit(1), m_logSizeLimit(20 * 1024 * 1024)
 {
+    m_datePatternString = rollingDatePattern(RI_Daily);
     setLogFilesLimit(1);
     setLogSizeLimit(1024 * 1024 * 20);
 }
@@ -69,7 +71,10 @@ QString RollingFileAppender::datePatternString() const
 void RollingFileAppender::setDatePattern(DatePattern datePattern)
 {
     QMutexLocker locker(&m_rollingMutex);
+    if (datePattern < MinutelyRollover || datePattern > MonthlyRollover)
+        return;
     m_frequency = datePattern;
+    m_datePatternString = rollingDatePattern(RollingInterval(datePattern));
 
     computeRollOverTime();
 }
@@ -92,10 +97,7 @@ void RollingFileAppender::removeOldFiles()
 
 void RollingFileAppender::computeRollOverTime()
 {
-    if (auto *fs = get_sink<rolling_file_sink_mt>(loggerName(QFile(fileName()))))
-    {
-        return fs->set_interval(RollingInterval(m_frequency));
-    }
+    detail::setFileInterval(this, RollingInterval(m_frequency));
 }
 
 void RollingFileAppender::rollOver()
@@ -104,13 +106,11 @@ void RollingFileAppender::rollOver()
 
 void RollingFileAppender::setLogFilesLimit(int limit)
 {
+    if (limit < 0 || limit > 200000)
+        return;
     QMutexLocker locker(&m_rollingMutex);
     m_logFilesLimit = limit;
-
-    if (auto *fs = get_sink<rolling_file_sink_mt>(loggerName(QFile(fileName()))))
-    {
-        return fs->set_max_files(std::size_t(limit));
-    }
+    detail::setFileCountLimit(this, std::size_t(limit));
 }
 
 int RollingFileAppender::logFilesLimit() const
@@ -121,13 +121,11 @@ int RollingFileAppender::logFilesLimit() const
 
 void RollingFileAppender::setLogSizeLimit(int limit)
 {
+    if (limit <= 0)
+        return;
     QMutexLocker locker(&m_rollingMutex);
     m_logSizeLimit = limit;
-
-    if (auto *fs = get_sink<rolling_file_sink_mt>(loggerName(QFile(fileName()))))
-    {
-        return fs->set_max_size(std::size_t(limit));
-    }
+    detail::setFileSizeLimit(this, std::size_t(limit));
 }
 
 qint64 RollingFileAppender::logSizeLimit() const
